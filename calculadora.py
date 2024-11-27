@@ -7,7 +7,7 @@ from kivy.core.window import Window
 Window.size = (350, 400)
 
 
-class MainApp(App):
+class CalculadoraApp(App):
     def build(self):
         self.operators = ["/", "X", "+", "-"]
         self.last_was_operator = None
@@ -22,6 +22,7 @@ class MainApp(App):
         )
         main_layout.add_widget(self.solution)
         buttons = [
+            "AC",
             ["7", "8", "9", "/"],
             ["4", "5", "6", "X"],
             ["1", "2", "3", "-"],
@@ -29,7 +30,16 @@ class MainApp(App):
         ]
         for row in buttons:
             h_layout = BoxLayout()
+            if str(row) == "AC":
+                button = Button(
+                    text="AC",
+                    pos_hint={"center_x": 0.5, "center_y": 0.5},
+                )
+                button.bind(on_press=self.on_button_press)
+                h_layout.add_widget(button)
             for label in row:
+                if label == "A":
+                    break
                 button = Button(
                     text=label,
                     pos_hint={"center_x": 0.5, "center_y": 0.5},
@@ -51,6 +61,12 @@ class MainApp(App):
 
         if button_text == "C":
             self.solution.text = ""
+        elif button_text == "AC":
+            if self.solution.text:
+                if self.solution.text[0] != "E":
+                    self.solution.text = self.solution.text[:-1]
+                else:
+                    self.solution.text = ""
         else:
             if current and (self.last_was_operator and button_text in self.operators):
                 return
@@ -66,10 +82,16 @@ class MainApp(App):
         text = self.solution.text
 
         if text:
-            solution = str(eval(self.solution.text))
-            self.solution.text = solution
+            try:
+                solution = str(eval(self.solution.text))
+                self.solution.text = solution
+            except ZeroDivisionError as exc:
+                self.solution.text = "Erro: divisão por 0"
+            except SyntaxError as sexc:
+                self.solution.text = "Erro de Sintaxe"
 
 
-if __name__ == "__main__":
-    app = MainApp()
+__name__ = "Calculadora"
+if __name__ == "Calculadora":
+    app = CalculadoraApp()
     app.run()
